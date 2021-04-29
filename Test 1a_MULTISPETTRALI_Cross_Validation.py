@@ -12,7 +12,7 @@ from sklearn.ensemble import RandomForestClassifier
 import time
 
 ### Caricamento dataset per training e validazione tramite parametri di accuratezza
-df_train_data = pd.read_csv("D:\\Ema Pontoglio\Salbertrand\DATASET TRAINING - TESTING PYTHON\Training 2.0\RE_NIR_Training2_INTEGER.txt", sep=';', error_bad_lines=False, low_memory=False).dropna()
+df_train_data = pd.read_csv("path of training dataset in .txt format", sep=';', error_bad_lines=False, low_memory=False).dropna()
 features = df_train_data.drop(columns=['FID', 'pointid', 'Class'], axis='columns')
 labels = df_train_data['Class']
 
