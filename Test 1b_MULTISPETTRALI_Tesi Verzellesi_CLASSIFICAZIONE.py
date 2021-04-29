@@ -19,15 +19,15 @@ from scikitplot.metrics import plot_confusion_matrix
 import matplotlib.pyplot as plt
 
 ### Caricamento dataset per training e validazione tramite parametri di accuratezza
-df_train_data = pd.read_csv("D:\\Ema Pontoglio\Salbertrand\DATASET TRAINING - TESTING PYTHON\Training 2.0\RE_NIR_Training2_INTEGER.txt", sep=';', error_bad_lines=False, low_memory=False)
+df_train_data = pd.read_csv("path of training dataset in .txt format", sep=';', error_bad_lines=False, low_memory=False)
 df_train_data = df_train_data.dropna()
-feature_columns = ['R_int','G_int','B_int']
+feature_columns = ['R_int','G_int','B_int']   # or ['RE_int','NIR_int']
 features = df_train_data[feature_columns]
 labels = df_train_data['Class']
 #print(labels.value_counts())
 
 ### Porzionamento se si hanno labels sbilanciate - altrimenti non usarlo
-portion = df_train_data.groupby('Class', sort=False).head(330000)
+portion = df_train_data.groupby('Class', sort=False).head(330000)  # value of .head() function is related on the minimun number of point obtained with labels.value_counts()
 features = portion[feature_columns]
 labels = portion['Class']
 
@@ -36,7 +36,7 @@ x_sparse = coo_matrix(features)
 features, x_sparse, labels = shuffle(features, x_sparse, labels, random_state=0)
 
 ### Addestramento modello ed accuratezza sul training dataset (capacità di generalizzazione) -> inserire CV e GridSearchCV per ottimizzazioen iperparametri RF
-model = RandomForestClassifier(n_estimators=10, random_state=0)
+model = RandomForestClassifier(n_estimators=50, criterion='gini', max_features='auto', min_samples_leaf=10, min_samples_split=10, random_state=None)
 t1 = time.time()
 model.fit(feature, labels)
 t2 = time.time()
@@ -46,13 +46,13 @@ accuracy = round(accuracy_score(labels, y_pred_train) * 100,2)
 print ("\tAccuracy on Train: %s" % (accuracy))
 
 ### Classificazione ed esportazione 2° dataset vergine
-df_testing = pd.read_csv("D:\Ema Pontoglio\Salbertrand\DATASET TRAINING - TESTING PYTHON\Terza porzione\RE_NIR_terza_porzione_INTEGER.txt", sep=';', error_bad_lines=False, low_memory=False)
+df_testing = pd.read_csv("path of testing unseen dataset in .txt format", sep=';', error_bad_lines=False, low_memory=False)
 df_testing_clean = df_testing.dropna().drop(columns=['FID', 'X', 'Y'])
-feature_columns_test = ['R_int','G_int','B_int']
+feature_columns_test = ['R_int','G_int','B_int']  # or ['RE_int','NIR_int']
 features_test = df_testing_clean[feature_columns_test]
 CLASSIFIED_DATASET = model.predict(df_testing_clean)
 
 tot_df = pd.concat([df_testing,df_testing_clean],axis=1).dropna()
-my_data_1 = np.vstack((tot_df.T.drop(['R_int','G_int','B_int']),CLASSIFIED_DATASET))
+my_data_1 = np.vstack((tot_df.T.drop(['R_int','G_int','B_int']),CLASSIFIED_DATASET))   # or ['RE_int','NIR_int']
 my_data_1 = my_data_1.T
 np.savetxt('INSERIRE NOME DESIDERATO.txt',my_data_1,fmt='%s',delimiter=';',header='PointID;X;Y;Class')
