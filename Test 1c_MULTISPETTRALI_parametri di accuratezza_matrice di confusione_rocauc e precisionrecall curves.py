@@ -20,15 +20,15 @@ from sklearn.preprocessing import LabelBinarizer
 from sklearn.preprocessing import label_binarize
 
 ### Caricamento dataset per training e addestramento del modello
-df_train_data = pd.read_csv("D:\\Ema Pontoglio\Salbertrand\DATASET TRAINING - TESTING PYTHON\Training 2.0\RE_NIR_Training2_INTEGER.txt", sep=';', error_bad_lines=False, low_memory=False).dropna()
+df_train_data = pd.read_csv("path of training dataset in .txt format", sep=';', error_bad_lines=False, low_memory=False).dropna()
 df_train_data = df_train_data.dropna()
-feature_columns = ['R_int','G_int','B_int']
+feature_columns = ['R_int','G_int','B_int']  # or ['RE_int','NIR_int']
 features = df_train_data[feature_columns]
 labels = df_train_data['Class']
 #print(labels.value_counts())
 
 ### Porzionamento se si hanno labels sbilanciate - altrimenti non usarlo
-portion = df_train_data.groupby('Class', sort=False).head(330000)   ### il valore si .head() è dato dalla soglio minima ottenuta del print della riga 22 ###
+portion = df_train_data.groupby('Class', sort=False).head(330000)   # the .head() value is related of teh minumum number of points obtained with label.value_counts()
 features = portion[feature_columns]
 labels = portion['Class']
 
@@ -37,7 +37,7 @@ x_sparse = coo_matrix(features)
 features, x_sparse, labels = shuffle(features, x_sparse, labels, random_state=0)
 
 ### Addestramento modello (gli iperparametri e i loro valori sono definiti dallo script di CV e GridSearchCV)
-model = RandomForestClassifier(n_estimators=10, random_state=0)
+model = RandomForestClassifier(n_estimators=50, criterion='gini', max_features='auto', min_samples_leaf=10, min_samples_split=10, random_state=None)
 t1 = time.time()
 model.fit(features, labels)
 t2 = time.time()
@@ -47,7 +47,7 @@ accuracy = round(accuracy_score(labels, y_pred_labels) * 100,2)
 print ("\tAccuracy on Train: %s" % (accuracy))
 
 ### Classificazione su 2° dataset vergine, parametri di accuratezza, matrice di confusione, ROC-AUC e Precision-Recall curves
-df_testing = pd.read_csv("D:\Ema Pontoglio\Salbertrand\DATASET TRAINING - TESTING PYTHON\Terza porzione\RE_NIR_terza_porzione_INTEGER_annotato.txt", sep=';', error_bad_lines=False, low_memory=False)
+df_testing = pd.read_csv("path of the classified testing dataset from 1b script, .txt format", sep=';', error_bad_lines=False, low_memory=False)
 X_test = df_testing.dropna().drop(columns=['FID', 'pointid', 'X', 'Y', 'Class'])
 y_test = df_testing['Class']
 y_pred=model.predict(X_test)
